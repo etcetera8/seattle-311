@@ -5,7 +5,7 @@ function App() {
 
   return (
     <>
-      <h1>Eugene 311 Map</h1>
+      <h1>Seattle 311 Map</h1>
       <Main />
     </>
   )
