@@ -3,7 +3,15 @@ import { MapboxOverlay } from "@deck.gl/mapbox";
 import { useEffect, useState } from "react";
 import { useControl } from "react-map-gl/maplibre";
 
-type Point = [longitude: number, latitude: number];
+type RawPoint = [longitude: number, latitude: number, typeIndex: number, unixDate: number];
+type CityData = {
+    types: string[],
+    points: RawPoint[]
+}
+type Point = [longitude: number, latitude: number, type: string, unixDate: number];
+
+const mapData = ({ types, points }: CityData): Point[] =>
+    points.map(([lng, lat, typeIndex, unixDate]) => [lng, lat, types[typeIndex], unixDate]);
 
 export const HexagonLayer = () => {
     const [requestData, setRequestData] = useState<Point[]>([]);
@@ -11,8 +19,8 @@ export const HexagonLayer = () => {
     useEffect(() => {
         const controller = new AbortController();
         fetch("/requests.json", { signal: controller.signal })
-            .then((res) => res.json())
-            .then((points: Point[]) => setRequestData(points))
+            .then((res) => res.json())  
+            .then((cityData: CityData) => setRequestData(mapData(cityData)))
             .catch((err) => {
                 if (err.name !== "AbortError") console.error("oops, there was an issue importing the data", err);
             });
@@ -29,7 +37,7 @@ export const HexagonLayer = () => {
                 new DeckHexagonLayer<Point>({
                     id: "requests-hexagons",
                     data: requestData,
-                    getPosition: (d) => d,
+                    getPosition: ([lng, lat]) => [lng, lat],
                     radius: 200,
                     elevationScale: 4,
                     extruded: true,
