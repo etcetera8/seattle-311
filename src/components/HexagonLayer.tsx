@@ -19,7 +19,9 @@ export const HexagonLayer = () => {
         return () => controller.abort();
     }, []);
 
-    const overlay = useControl(() => new MapboxOverlay({}));
+    const overlay = useControl(() => new MapboxOverlay({
+        getTooltip: (data) =>  data.object ? JSON.stringify(data.object.count) : null
+    }));
 
     useEffect(() => {
         overlay.setProps({
