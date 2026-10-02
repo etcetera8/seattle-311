@@ -6,7 +6,7 @@ export const Main = () => {
     return(
         <div>
             <Map
-                initialViewState={{ longitude: -122.34, latitude: 47.60, zoom: 12 }}
+                initialViewState={{ longitude: -122.34, latitude: 47.60, zoom: 12, pitch: 45 }}
                 style={{ width: '50%', height: '50vh' }}
                 mapStyle="https://tiles.openfreemap.org/styles/liberty"
             >
