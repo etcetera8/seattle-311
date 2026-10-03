@@ -21,7 +21,7 @@ export const Main = observer(() => {
                 style={{ width: '100%', height: '50vh' }}
                 mapStyle="https://tiles.openfreemap.org/styles/liberty"
             >
-                {controller.allData.length > 0 && <HexagonLayer data={controller.filteredData} />}
+                {controller.hasData && <HexagonLayer data={controller.filteredData} />}
             </Map>
         </div>
     )

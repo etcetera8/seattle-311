@@ -7,33 +7,41 @@ export type CityData = {
 }
 export type Point = [longitude: number, latitude: number, type: string, unixDate: number];
 
+export const ALL = "All";
+
 export class Controller {
-    years: Record<string, Point[]> = {};
-    selectedYear: number | null = null;
+    pointsByYear: Record<string, Point[]> = {};
+    selectedYear: string = ALL;
     types: string[] = [];
     selectedType: string | null = null;
-    allData: Point[] = [];
-    filteredData: Point[] = [];
 
     constructor() {
-        makeAutoObservable(this, { allData: observableRef, types: observableRef }, { autoBind: true });
+        makeAutoObservable(this, { pointsByYear: observableRef, types: observableRef }, { autoBind: true });
+    }
+
+    get filteredData(): Point[] {
+        const points = this.pointsByYear[this.selectedYear] ?? [];
+        return this.selectedType ? points.filter(x => x[2] === this.selectedType) : points;
+    }
+
+    get years(): string[] {
+        return Object.keys(this.pointsByYear).filter(x => x !== ALL);
+    }
+
+    get hasData(): boolean {
+        return (this.pointsByYear[ALL]?.length ?? 0) > 0;
     }
 
     init() {
         this.fetchData();
     }
 
-    setType(type: string | null)  {
-        this.selectedType = type;
-        if (type) {
-            this.filteredData = this.allData.filter(x => x[2] == type)
-        } else {
-            this.filteredData = this.allData;
-        }
+    setType(type: string | null) {
+        this.selectedType = type || null;
     }
 
     setYear(year: string) {
-        this.selectedYear = parseInt(year);
+        this.selectedYear = year;
     }
 
     private fetchData() {
@@ -41,9 +49,7 @@ export class Controller {
             .then((res) => res.json())
             .then((cityData: CityData) => runInAction(() => {
                 this.types = [...cityData.types];
-                this.allData = this.mapData(cityData);
-                this.filteredData = this.allData;
-                this.years = this.interpolateYears();
+                this.pointsByYear = this.groupByYear(this.mapData(cityData));
             }))
             .catch((e) => console.error("Error fetching data", { e }));
     }
@@ -56,17 +62,11 @@ export class Controller {
         return new Date(unixDate * 1000).getUTCFullYear().toString();
     }
 
-    private interpolateYears() {
-        const yearData = this.filteredData.reduce<Record<string, Point[]>>(( accumulator, point) => {
-            const year = this.parseYear(point[3]);
-            if (!accumulator[year]) {
-                accumulator[year] = [point];
-            } else {
-                accumulator[year].push(point);
-            }
-            return accumulator;
-        }, {})
-        console.log({ yearData })
-        return yearData;
+    private groupByYear(points: Point[]): Record<string, Point[]> {
+        const grouped: Record<string, Point[]> = { [ALL]: points };
+        for (const point of points) {
+            (grouped[this.parseYear(point[3])] ??= []).push(point);
+        }
+        return grouped;
     }
 }
