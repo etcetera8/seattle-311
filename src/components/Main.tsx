@@ -14,11 +14,14 @@ export const Main = observer(() => {
     }, [controller]);
 
     return(
-        <div>
-            <FilterSection controller={controller} />
+        <div id="main-content">
+            <div className="filter-panel">
+                <h1>Seattle 311 Map</h1>
+                <FilterSection controller={controller} />
+            </div>
             <Map
                 initialViewState={{ longitude: -122.34, latitude: 47.60, zoom: 11, pitch: 45 }}
-                style={{ width: '100%', height: '50vh' }}
+                style={{ width: '100%', height: '100%' }}
                 mapStyle="https://tiles.openfreemap.org/styles/liberty"
             >
                 {controller.hasData && <HexagonLayer data={controller.filteredData} />}

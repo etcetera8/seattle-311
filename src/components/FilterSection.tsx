@@ -14,6 +14,8 @@ interface Option {
 
 const toOption = (x: string): Option => ({ value: x, label: x });
 
+const portalStyles = { menuPortal: (base: object) => ({ ...base, zIndex: 10 }) };
+
 export const FilterSection: FC<Props> = observer(({ controller }) => {
     const typeOptions = controller.types.map(toOption);
     const yearOptions = [{ value: ALL, label: "All" }, ...controller.years.map(toOption)];
@@ -23,22 +25,33 @@ export const FilterSection: FC<Props> = observer(({ controller }) => {
 
     return (
         <>
-            <Select
-                inputId="type"
-                options={typeOptions}
-                value={selectedTypeOption}
-                onChange={option => controller.setType(option?.value ?? null)}
-                isClearable
-                placeholder="All"
-            />
+            <label className="filter-field">
+                <span>Request type</span>
+                <Select
+                    inputId="type"
+                    options={typeOptions}
+                    value={selectedTypeOption}
+                    onChange={option => controller.setType(option?.value ?? null)}
+                    isClearable
+                    placeholder="All"
+                    menuPortalTarget={document.body}
+                    styles={portalStyles}
+                />
+            </label>
 
+            <label className="filter-field">
+                <span>Year</span>
+                <Select
+                    inputId="year"
+                    options={yearOptions}
+                    value={selectedYearOption}
+                    onChange={option => controller.setYear(option?.value ?? ALL)}
+                    menuPortalTarget={document.body}
+                    styles={portalStyles}
+                />
+            </label>
 
-            <Select
-                inputId="year"
-                options={yearOptions}
-                value={selectedYearOption}
-                onChange={option => controller.setYear(option?.value ?? ALL)}
-            />
+            <p>{controller.filteredData.length.toLocaleString()} requests</p>
         </>
     );
 
