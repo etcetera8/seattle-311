@@ -27,6 +27,8 @@ export class Controller {
         this.selectedType = type;
         if (type) {
             this.filteredData = this.allData.filter(x => x[2] == type)
+        } else {
+            this.filteredData = this.allData;
         }
     }
 
