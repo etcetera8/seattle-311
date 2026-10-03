@@ -9,7 +9,9 @@ export type Point = [longitude: number, latitude: number, type: string, unixDate
 
 export class Controller {
     years: number[] = [];
+    selectedYear: number | null = null;
     types: string[] = [];
+    selectedType: string | null = null;
     dataPoints: Point[] = [];
 
     constructor() {
@@ -20,11 +22,15 @@ export class Controller {
         this.fetchData();
     }
 
+    setType(type: string | null)  {
+        this.selectedType = type;
+    }
+
     private fetchData() {
         fetch("/requests.json")
             .then((res) => res.json())
             .then((cityData: CityData) => runInAction(() => {
-                this.types = cityData.types;
+                this.types = [...cityData.types];
                 this.dataPoints = this.mapData(cityData);
             }))
             .catch((e) => console.error("Error fetching data", { e }));

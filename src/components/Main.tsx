@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import Map from "react-map-gl/maplibre";
 import { Controller } from "../viewmodels/controller.viewmodel";
+import { FilterSection } from "./FilterSection";
 import { HexagonLayer } from "./HexagonLayer";
 
 export const Main = observer(() => {
@@ -14,6 +15,7 @@ export const Main = observer(() => {
 
     return(
         <div>
+            <FilterSection controller={controller} />
             <Map
                 initialViewState={{ longitude: -122.34, latitude: 47.60, zoom: 11, pitch: 45 }}
                 style={{ width: '100%', height: '50vh' }}
