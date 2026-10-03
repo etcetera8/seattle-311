@@ -12,10 +12,11 @@ export class Controller {
     selectedYear: number | null = null;
     types: string[] = [];
     selectedType: string | null = null;
-    dataPoints: Point[] = [];
+    allData: Point[] = [];
+    filteredData: Point[] = [];
 
     constructor() {
-        makeAutoObservable(this, { dataPoints: observableRef, types: observableRef }, { autoBind: true });
+        makeAutoObservable(this, { allData: observableRef, types: observableRef }, { autoBind: true });
     }
 
     init() {
@@ -24,6 +25,9 @@ export class Controller {
 
     setType(type: string | null)  {
         this.selectedType = type;
+        if (type) {
+            this.filteredData = this.allData.filter(x => x[2] == type)
+        }
     }
 
     private fetchData() {
@@ -31,7 +35,8 @@ export class Controller {
             .then((res) => res.json())
             .then((cityData: CityData) => runInAction(() => {
                 this.types = [...cityData.types];
-                this.dataPoints = this.mapData(cityData);
+                this.allData = this.mapData(cityData);
+                this.filteredData = this.allData;
             }))
             .catch((e) => console.error("Error fetching data", { e }));
     }

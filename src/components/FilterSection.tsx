@@ -9,8 +9,7 @@ export const FilterSection: FC<Props> = ({ controller }) => {
     const options = controller.types.map(x => <option value={x}>{x}</option>)
     return (
         <>
-            <select value={controller.selectedType ?? undefined} onChange={e => controller.setType(e.target.value)} 
-            >
+            <select value={controller.selectedType ?? undefined} onChange={e => controller.setType(e.target.value)}>
                 <option value="">All</option>
                 {options}
             </select>
