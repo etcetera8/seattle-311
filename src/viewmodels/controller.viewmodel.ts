@@ -8,7 +8,7 @@ export type CityData = {
 export type Point = [longitude: number, latitude: number, type: string, unixDate: number];
 
 export class Controller {
-    years: number[] = [];
+    years: Record<string, Point[]> = {};
     selectedYear: number | null = null;
     types: string[] = [];
     selectedType: string | null = null;
@@ -32,6 +32,10 @@ export class Controller {
         }
     }
 
+    setYear(year: string) {
+        this.selectedYear = parseInt(year);
+    }
+
     private fetchData() {
         fetch("/requests.json")
             .then((res) => res.json())
@@ -39,11 +43,30 @@ export class Controller {
                 this.types = [...cityData.types];
                 this.allData = this.mapData(cityData);
                 this.filteredData = this.allData;
+                this.years = this.interpolateYears();
             }))
             .catch((e) => console.error("Error fetching data", { e }));
     }
 
     private mapData({ types, points }: CityData): Point[] {
         return points.map(([lng, lat, typeIndex, unixDate]) => [lng, lat, types[typeIndex], unixDate]);
+    }
+
+    private parseYear(unixDate: number) {
+        return new Date(unixDate * 1000).getUTCFullYear().toString();
+    }
+
+    private interpolateYears() {
+        const yearData = this.filteredData.reduce<Record<string, Point[]>>(( accumulator, point) => {
+            const year = this.parseYear(point[3]);
+            if (!accumulator[year]) {
+                accumulator[year] = [point];
+            } else {
+                accumulator[year].push(point);
+            }
+            return accumulator;
+        }, {})
+        console.log({ yearData })
+        return yearData;
     }
 }
