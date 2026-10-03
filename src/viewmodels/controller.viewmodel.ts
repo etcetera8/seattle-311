@@ -11,16 +11,18 @@ export const ALL = "All";
 
 export class Controller {
     pointsByYear: Record<string, Point[]> = {};
-    selectedYear: string = ALL;
     types: string[] = [];
     selectedType: string | null = null;
+    selectedYears: string[] = [];
 
     constructor() {
         makeAutoObservable(this, { pointsByYear: observableRef, types: observableRef }, { autoBind: true });
     }
 
     get filteredData(): Point[] {
-        const points = this.pointsByYear[this.selectedYear] ?? [];
+        const points = this.selectedYears.length
+            ? this.selectedYears.flatMap(year => this.pointsByYear[year] ?? [])
+            : this.pointsByYear[ALL] ?? [];
         return this.selectedType ? points.filter(x => x[2] === this.selectedType) : points;
     }
 
@@ -40,8 +42,8 @@ export class Controller {
         this.selectedType = type || null;
     }
 
-    setYear(year: string) {
-        this.selectedYear = year;
+    setYears(years: string[]) {
+        this.selectedYears = years;
     }
 
     private fetchData() {

@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import type { FC } from "react";
-import Select from "react-select";
-import { ALL, type Controller } from "../viewmodels/controller.viewmodel";
+import Select, { type MultiValue } from "react-select";
+import type { Controller } from "../viewmodels/controller.viewmodel";
 
 interface Props {
     controller: Controller;
@@ -18,15 +18,19 @@ const portalStyles = { menuPortal: (base: object) => ({ ...base, zIndex: 10 }) }
 
 export const FilterSection: FC<Props> = observer(({ controller }) => {
     const typeOptions = controller.types.map(toOption);
-    const yearOptions = [{ value: ALL, label: "All" }, ...controller.years.map(toOption)];
+    const yearOptions = controller.years.map(toOption);
 
     const selectedTypeOption = typeOptions.find(o => o.value === controller.selectedType) ?? null;
-    const selectedYearOption = yearOptions.find(o => o.value === controller.selectedYear) ?? yearOptions[0];
 
+    const selectedYearOptions = yearOptions.filter(o => controller.selectedYears.includes(o.value))
+    const handleMultiChange = (selected: MultiValue<Option>) => {
+        const values = selected.map(x => x.value)
+        controller.setYears(values)
+    }
     return (
         <>
             <label className="filter-field">
-                <span>Request type</span>
+                <span>Request Category</span>
                 <Select
                     inputId="type"
                     options={typeOptions}
@@ -42,10 +46,12 @@ export const FilterSection: FC<Props> = observer(({ controller }) => {
             <label className="filter-field">
                 <span>Year</span>
                 <Select
+                    isMulti
                     inputId="year"
                     options={yearOptions}
-                    value={selectedYearOption}
-                    onChange={option => controller.setYear(option?.value ?? ALL)}
+                    value={selectedYearOptions}
+                    onChange={handleMultiChange}
+                    placeholder="All"
                     menuPortalTarget={document.body}
                     styles={portalStyles}
                 />
