@@ -1,15 +1,26 @@
 import { HexagonLayer as DeckHexagonLayer } from "@deck.gl/aggregation-layers";
 import { MapboxOverlay } from "@deck.gl/mapbox";
-import { useEffect, type FC } from "react";
-import { useControl } from "react-map-gl/maplibre";
-import type { Point } from "../viewmodels/controller.viewmodel";
+import { useEffect, useState, type FC } from "react";
+import { useControl, Popup } from "react-map-gl/maplibre";
+import type { Controller, Point } from "../viewmodels/controller.viewmodel";
 
 interface Props {
-    data: Point[]
+    data: Point[];
+    controller: Controller;
 }
-export const HexagonLayer: FC<Props> = ({ data} ) => {
+type HexPoint = {
+    index: number,
+    latLong: number[],
+    count: number,
+}
+export const HexagonLayer: FC<Props> = ({ data, controller }) => {
+    const [selectedHex, setSelectedHex] = useState<HexPoint | null>(null);
+    useEffect(() => {
+        setSelectedHex(null);
+    }, [data])
+
     const overlay = useControl(() => new MapboxOverlay({
-        getTooltip: (data) =>  data.object ? JSON.stringify(data.object.count) : null
+        getTooltip: (data) =>  data.object && selectedHex == null ? `${controller.selectedType ?? "All Reports counts"}: ` +JSON.stringify(data.object.count) : null,
     }));
 
     useEffect(() => {
@@ -23,10 +34,25 @@ export const HexagonLayer: FC<Props> = ({ data} ) => {
                     elevationScale: 4,
                     extruded: true,
                     pickable: true,
+                    onClick: (data) => {
+                        if (!data.object || !data.coordinate) return false;
+                        setSelectedHex({ index: data.index, latLong: data.coordinate, count: data.object.count })
+                        return false;
+                    },
+                    highlightedObjectIndex: selectedHex?.index ?? -1,
                 }),
             ],
         });
-    }, [overlay, data]);
+    }, [overlay, data, selectedHex]);
 
-    return null;
+    return selectedHex ?
+        <Popup
+            longitude={selectedHex.latLong[0]}
+            latitude={selectedHex.latLong[1]}
+            onClose={() => setSelectedHex(null)}
+            closeOnClick={false}
+        >
+            {controller.selectedType ?? "All"}: {selectedHex.count}
+        </Popup>
+    : null;
 }

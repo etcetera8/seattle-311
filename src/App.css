@@ -33,3 +33,7 @@
     border-radius: 0;
   }
 }
+
+.maplibregl-popup {
+  z-index: 3;
+}

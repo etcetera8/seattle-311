@@ -27,6 +27,7 @@ export const FilterSection: FC<Props> = observer(({ controller }) => {
         const values = selected.map(x => x.value)
         controller.setYears(values)
     }
+
     return (
         <>
             <label className="filter-field">
